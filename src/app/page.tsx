@@ -1,102 +1,182 @@
-import Image from "next/image";
+'use client';
+
+import { useState } from 'react';
+import Image from 'next/image';
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [inputText, setInputText] = useState('');
+  const [selectedFunctions, setSelectedFunctions] = useState<string[]>(['summarize']);
+  const [targetLanguage, setTargetLanguage] = useState('French');
+  const [isLoading, setIsLoading] = useState(false);
+  const [result, setResult] = useState<any>(null);
+  const [error, setError] = useState('');
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!inputText.trim()) {
+      setError('Please enter some text');
+      return;
+    }
+    
+    if (selectedFunctions.length === 0) {
+      setError('Please select at least one AI function');
+      return;
+    }
+    
+    setIsLoading(true);
+    setError('');
+    
+    try {
+      const response = await fetch('/api/ask-ai', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text: inputText,
+          functions: selectedFunctions,
+          targetLanguage,
+        }),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Something went wrong');
+      }
+      
+      setResult(data);
+    } catch (err: any) {
+      setError(err.message || 'Failed to process request');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  const handleFunctionToggle = (func: string) => {
+    setSelectedFunctions(prev => 
+      prev.includes(func) 
+        ? prev.filter(f => f !== func) 
+        : [...prev, func]
+    );
+  };
+
+  return (
+    <div className="min-h-screen p-8 max-w-4xl mx-auto">
+      <header className="mb-8 text-center">
+        <h1 className="text-3xl font-bold mb-2">AI Function Calling Demo</h1>
+        <p className="text-gray-600 dark:text-gray-300">
+          Test chaining AI functions for text processing
+        </p>
+      </header>
+
+      <main>
+        <form onSubmit={handleSubmit} className="mb-8 space-y-4">
+          <div>
+            <label htmlFor="input-text" className="block mb-2 font-medium">
+              Enter Text to Process:
+            </label>
+            <textarea
+              id="input-text"
+              className="w-full border border-gray-300 dark:border-gray-700 rounded-md p-3 min-h-[150px] bg-white dark:bg-gray-800"
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              placeholder="Enter some text to process with AI functions..."
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+          </div>
+          
+          <div>
+            <p className="block mb-2 font-medium">Select AI Functions to Apply:</p>
+            <div className="flex flex-wrap gap-4">
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={selectedFunctions.includes('summarize')}
+                  onChange={() => handleFunctionToggle('summarize')}
+                  className="rounded"
+                />
+                <span>Summarize</span>
+              </label>
+              
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={selectedFunctions.includes('translate')}
+                  onChange={() => handleFunctionToggle('translate')}
+                  className="rounded"
+                />
+                <span>Translate</span>
+              </label>
+            </div>
+          </div>
+          
+          {selectedFunctions.includes('translate') && (
+            <div>
+              <label htmlFor="target-language" className="block mb-2 font-medium">
+                Select Target Language:
+              </label>
+              <select
+                id="target-language"
+                className="border border-gray-300 dark:border-gray-700 rounded-md p-2 bg-white dark:bg-gray-800"
+                value={targetLanguage}
+                onChange={(e) => setTargetLanguage(e.target.value)}
+              >
+                <option value="French">French</option>
+                <option value="Spanish">Spanish</option>
+                <option value="German">German</option>
+                <option value="Italian">Italian</option>
+              </select>
+            </div>
+          )}
+          
+          {error && (
+            <div className="text-red-500 p-2 rounded-md">
+              {error}
+            </div>
+          )}
+          
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-blue-400"
           >
-            Read our docs
-          </a>
-        </div>
+            {isLoading ? 'Processing...' : 'Process Text'}
+          </button>
+        </form>
+        
+        {result && (
+          <div className="border border-gray-300 dark:border-gray-700 rounded-md p-4 bg-white dark:bg-gray-800">
+            <h2 className="text-xl font-bold mb-4">Results:</h2>
+            
+            <div className="mb-4">
+              <h3 className="font-medium mb-2">Final Result:</h3>
+              <div className="p-3 bg-gray-100 dark:bg-gray-700 rounded-md">
+                {result.result}
+              </div>
+            </div>
+            
+            {result.steps && result.steps.length > 0 && (
+              <div>
+                <h3 className="font-medium mb-2">Processing Steps:</h3>
+                <ol className="list-decimal pl-6 space-y-2">
+                  {result.steps.map((step: any, index: number) => (
+                    <li key={index}>
+                      <p><strong>{step.function}</strong>:</p>
+                      <p className="p-2 bg-gray-100 dark:bg-gray-700 rounded-md mt-1">
+                        {step.output}
+                      </p>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            )}
+          </div>
+        )}
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+
+      <footer className="mt-12 text-center text-sm text-gray-600 dark:text-gray-400">
+        <p>AI Function Calling Demo - Intern Assignment</p>
       </footer>
     </div>
   );

@@ -1,36 +1,106 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI Function Calling Demo
+
+This Next.js application demonstrates AI function calling with the ability to chain multiple AI functions together. It features a simple API endpoint at `/api/ask-ai` that can process text through various AI functions.
+
+## Features
+
+- ✅ Next.js application with TypeScript
+- ✅ API endpoint at `/api/ask-ai` for AI function processing
+- ✅ Function chaining capability (Summarize → Translate)
+- ✅ Simulated AI calls with option for real OpenAI integration
+- ✅ Simple user interface for testing
+
+## AI Functions Implemented
+
+1. **Text Summarization**: Condenses input text into a shorter summary
+2. **Text Translation**: Translates text into different languages (French, Spanish, German, Italian)
+
+## How It Works
+
+The application provides two methods of AI function calling:
+
+### Simulated Mode (Default)
+- No API key required
+- Quick responses for demonstration purposes
+- Simulated processing of text data
+
+### Real API Mode
+- Requires an OpenAI API key set as an environment variable
+- Makes actual calls to OpenAI's API for text processing
+- Set `USE_REAL_API=true` in your environment variables
+
+## Project Structure
+
+```
+src/
+├── app/
+│   ├── api/
+│   │   └── ask-ai/         # API endpoint for AI function calls
+│   │       └── route.ts    # API route handler
+│   ├── page.tsx            # Main app page with UI
+├── services/
+│   └── ai/
+│       ├── chain.ts        # Function chaining logic
+│       ├── summarizer.ts   # Text summarization function
+│       └── translator.ts   # Text translation function
+```
 
 ## Getting Started
 
-First, run the development server:
+1. Clone the repository
+2. Install dependencies:
+   ```
+   npm install
+   ```
+3. Start the development server:
+   ```
+   npm run dev
+   ```
+4. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Using the API
+
+Send a POST request to `/api/ask-ai` with the following JSON body:
+
+```json
+{
+  "text": "Your text to process",
+  "functions": ["summarize", "translate"],
+  "targetLanguage": "French"
+}
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The API will return a JSON response with the processed result and details about each processing step:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```json
+{
+  "result": "Final processed text",
+  "steps": [
+    {
+      "function": "summarize",
+      "output": "Summarized text"
+    },
+    {
+      "function": "translate",
+      "output": "Translated text"
+    }
+  ]
+}
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Using Real OpenAI API
 
-## Learn More
+To use the real OpenAI API:
 
-To learn more about Next.js, take a look at the following resources:
+1. Get an API key from [OpenAI](https://platform.openai.com/account/api-keys)
+2. Set environment variables:
+   ```
+   OPENAI_API_KEY=your-api-key
+   USE_REAL_API=true
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Technologies Used
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Next.js
+- TypeScript
+- OpenAI API
