@@ -1,14 +1,14 @@
 # AI Function Calling Demo
 
-This Next.js application demonstrates AI function calling with the ability to chain multiple AI functions together. It features a simple API endpoint at `/api/ask-ai` that can process text through various AI functions.
+This Next.js application demonstrates AI function calling with the ability to chain multiple AI functions together. It features a simple API endpoint at `/api/ask-ai` that processes text through various AI functions.
 
 ## Features
 
-- ✅ Next.js application with TypeScript
+- ✅ Modern Next.js application with TypeScript and Tailwind CSS
 - ✅ API endpoint at `/api/ask-ai` for AI function processing
 - ✅ Function chaining capability (Summarize → Translate)
-- ✅ Simulated AI calls with option for real OpenAI integration
-- ✅ Simple user interface for testing
+- ✅ Real integration with Groq AI API
+- ✅ Clean, responsive user interface
 
 ## AI Functions Implemented
 
@@ -19,15 +19,15 @@ This Next.js application demonstrates AI function calling with the ability to ch
 
 The application provides two methods of AI function calling:
 
-### Simulated Mode (Default)
+### Simulated Mode
 - No API key required
 - Quick responses for demonstration purposes
 - Simulated processing of text data
 
-### Real API Mode
-- Requires an OpenAI API key set as an environment variable
-- Makes actual calls to OpenAI's API for text processing
-- Set `USE_REAL_API=true` in your environment variables
+### Real API Mode (Default)
+- Uses Groq's LLama3 model for high-quality results
+- Makes actual calls to Groq's API for text processing
+- Environment variables are preconfigured for immediate use
 
 ## Project Structure
 
@@ -38,6 +38,8 @@ src/
 │   │   └── ask-ai/         # API endpoint for AI function calls
 │   │       └── route.ts    # API route handler
 │   ├── page.tsx            # Main app page with UI
+│   ├── layout.tsx          # Root layout with fonts and metadata
+│   └── globals.css         # Global styles
 ├── services/
 │   └── ai/
 │       ├── chain.ts        # Function chaining logic
@@ -70,7 +72,7 @@ Send a POST request to `/api/ask-ai` with the following JSON body:
 }
 ```
 
-The API will return a JSON response with the processed result and details about each processing step:
+The API returns a JSON response with the processed result and details about each processing step:
 
 ```json
 {
@@ -88,19 +90,19 @@ The API will return a JSON response with the processed result and details about 
 }
 ```
 
-## Using Real OpenAI API
+## Using Groq API
 
-To use the real OpenAI API:
+This project is preconfigured to use Groq's LLama3 model. The necessary environment variables are:
 
-1. Get an API key from [OpenAI](https://platform.openai.com/account/api-keys)
-2. Set environment variables:
-   ```
-   OPENAI_API_KEY=your-api-key
-   USE_REAL_API=true
-   ```
+```
+GROQ_API_KEY=your-groq-api-key
+USE_REAL_API=true
+```
 
 ## Technologies Used
 
-- Next.js
+- Next.js 15
+- React 19
 - TypeScript
-- OpenAI API
+- Tailwind CSS 4
+- Groq LLama3 AI
